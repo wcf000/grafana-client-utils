@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional
 from circuitbreaker import circuit
 from prometheus_client import Counter, Histogram
 from pydantic import BaseModel, Field, validator
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from app.core.grafana.client import GrafanaClient
 from app.core.grafana.exceptions import (
@@ -43,7 +43,7 @@ class AlertRule(BaseModel):
     uid: str = Field(..., min_length=1, max_length=40)
     title: str = Field(..., min_length=1, max_length=255)
     condition: str
-    severity: str = Field(..., regex=r"^(critical|warning|info)$")
+    severity: str = Field(..., pattern=r"^(critical|warning|info)$")
     enabled: bool = True
     annotations: Dict[str, str] = {}
     labels: Dict[str, str] = {}
@@ -77,14 +77,14 @@ class GrafanaAlertManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError),
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
     )
-    @ALERT_LATENCY.time()
+    @ALERT_LATENCY.labels("create").time()
     def create_alert(self, alert: AlertRule) -> Dict[str, Any]:
         """Create a new alert rule with production hardening"""
         try:
             grafana = self.client.get_client()
-            result = grafana.alerting.create_alert_rule(alert.dict())
+            result = grafana.alerting.create_alert_rule(alert.model_dump())
 
             ALERT_OPERATIONS.labels("create", "success").inc()
             logger.info(f"Created alert {alert.uid}")
@@ -102,27 +102,24 @@ class GrafanaAlertManager:
             error.log_error()
             raise error
 
-    @circuit(failure_threshold=5, recovery_timeout=60, name="grafana_alerts_bulk")
     def bulk_create_alerts(self, alerts: List[AlertRule]) -> Dict[str, Any]:
-        """Batch create alerts with circuit breaker protection"""
+        """Bulk create alerts and collect results"""
         results = {"success": [], "failed": []}
-
         for alert in alerts:
             try:
                 result = self.create_alert(alert)
-                results["success"].append({"uid": alert.uid, "version": 1})
+                results["success"].append(result)
             except Exception as e:
                 results["failed"].append({"uid": alert.uid, "error": str(e)})
-
         return results
 
     @circuit(failure_threshold=5, recovery_timeout=60, name="grafana_alerts_async")
     async def async_create_alert(self, alert: AlertRule) -> Dict[str, Any]:
         """Async version with timeout handling"""
         try:
-            async with asyncio.timeout(self.timeout.for_operation("create_alert")):
+            async with asyncio.timeout(self.timeout.default):
                 grafana = await self.client.get_async_client()
-                result = await grafana.alerting.async_create_alert_rule(alert.dict())
+                result = await grafana.alerting.async_create_alert_rule(alert.model_dump())
 
                 ALERT_OPERATIONS.labels("create", "success").inc()
                 logger.info(f"Async created alert {alert.uid}")
@@ -132,7 +129,7 @@ class GrafanaAlertManager:
             ALERT_OPERATIONS.labels("create", "timeout").inc()
             raise GrafanaTimeoutError(
                 operation="async_create_alert",
-                timeout=self.timeout.for_operation("create_alert"),
+                timeout=self.timeout.default,
                 threshold=self.timeout,
             )
         except Exception as e:

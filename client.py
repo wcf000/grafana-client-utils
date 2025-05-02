@@ -49,28 +49,14 @@ class GrafanaClient:
             self._session = self._create_session()
         return self._session
 
-    def _get_circuit_breaker_config(self):
-        """Get circuit breaker configuration for this instance"""
-        return {
-            "failure_threshold": self.config.CIRCUIT_BREAKER_CONFIG[
-                "failure_threshold"
-            ],
-            "recovery_timeout": self.config.CIRCUIT_BREAKER_CONFIG["recovery_timeout"],
-            "expected_exception": self.config.CIRCUIT_BREAKER_CONFIG[
-                "expected_exception"
-            ],
-        }
-
     @circuit(
-        failure_threshold=lambda self: self._get_circuit_breaker_config()[
-            "failure_threshold"
-        ],
-        recovery_timeout=lambda self: self._get_circuit_breaker_config()[
-            "recovery_timeout"
-        ],
-        expected_exception=lambda self: self._get_circuit_breaker_config()[
-            "expected_exception"
-        ],
+        failure_threshold=5,
+        recovery_timeout=60,
+        expected_exception=(
+            GrafanaConnectionError,
+            GrafanaRateLimitError,
+     
+        )
     )
     @retry(
         stop=stop_after_attempt(3),
@@ -159,6 +145,10 @@ class GrafanaClient:
                 )
                 error.log_error()
                 raise error
+
+    async def get_async_client(self):
+        """Stub async client for testing (mocked in tests)"""
+        pass
 
     def _create_session(self) -> requests.Session:
         """Configure a production-ready requests session"""

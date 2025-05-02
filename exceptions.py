@@ -61,7 +61,7 @@ class GrafanaError(Exception):
             "Grafana error occurred",
             extra={
                 "code": self.detail.code,
-                "message": self.detail.message,
+                "error_message": self.detail.message,
                 "context": self.detail.context or {},
             },
         )

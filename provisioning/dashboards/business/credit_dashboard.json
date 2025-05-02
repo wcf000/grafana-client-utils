@@ -1,0 +1,27 @@
+{
+  "title": "Credit Usage Dashboard",
+  "panels": [
+    {
+      "title": "Credits Remaining",
+      "type": "stat",
+      "targets": [{
+        "expr": "credits_remaining",
+        "legendFormat": "{{credit_type}} for {{user_id}}"
+      }]
+    },
+    {
+      "title": "Credit Usage Over Time",
+      "type": "graph",
+      "targets": [{
+        "expr": "rate(credits_used_total[5m])",
+        "legendFormat": "{{credit_type}} usage"
+      }]
+    }
+  ],
+  "templating": {
+    "list": [{
+      "name": "credit_type",
+      "query": "label_values(credits_used_total, credit_type)"
+    }]
+  }
+}

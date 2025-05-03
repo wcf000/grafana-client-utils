@@ -1,0 +1,95 @@
+graph TD
+
+
+    %% 2. Subgraph Node Definitions
+    subgraph "Provisioning Details"
+        direction TB
+        B_Sub1["Define as Code"]
+        B_Sub2["Use YAML Files"]
+        B_Sub3["Store JSON and Configs"]
+    end
+
+    subgraph "Deployment Details"
+        direction TB
+        F_Sub1["Use deploy_dashboards.sh"]
+        F_Sub2["Integrate CI/CD"]
+    end
+
+    subgraph "API Usage Details"
+        direction TB
+        I_Sub1["Use client.py"]
+        I_Sub2["Use dashboard_manager.py"]
+        I_Sub3["Use alert_manager.py"]
+    end
+
+    subgraph "Monitoring Details"
+       direction TB
+       M_Sub1["Use metrics.py"]
+       M_Sub2["Integrate Prometheus"]
+       M_Sub3["Visualize in Grafana"]
+    end
+
+    subgraph "Alerting Details"
+        direction TB
+        Q_Sub1["Use alert_manager.py"]
+        Q_Sub2["Configure Notifiers"]
+        Q_Sub3["Use exceptions.py"]
+    end
+
+   subgraph "Configuration Details"
+       direction TB
+       U_Sub1["Use models.py"]
+       U_Sub2["Use config.py"]
+   end
+
+   subgraph "Backup Details"
+        direction TB
+        X_Sub1["Use backup.py"]
+   end
+
+   subgraph "Best Practices Details"
+        direction TB
+        BP1["Version Control"]
+        BP2["CI/CD Integration"]
+        BP3["Full Stack Monitoring"]
+        BP4["Actionable Alerting"]
+        BP5["Secure Secrets"]
+        BP6["Documentation"]
+   end
+
+    %% 3. Connections
+    A --> B --> F --> I --> M --> Q --> U --> X --> Z --> ZG
+    B --> B_Sub1
+    F --> F_Sub1
+    I --> I_Sub1
+    M --> M_Sub1
+    Q --> Q_Sub1
+    U --> U_Sub1
+    X --> X_Sub1
+    Z --> BP1
+    Z --> BP2
+    Z --> BP3
+    Z --> BP4
+    Z --> BP5
+    Z --> BP6
+    B_Sub1 --> B_Sub2 --> B_Sub3
+    F_Sub1 --> F_Sub2
+    I_Sub1 --> I_Sub2 --> I_Sub3
+    M_Sub1 --> M_Sub2 --> M_Sub3
+    Q_Sub1 --> Q_Sub2 --> Q_Sub3
+    U_Sub1 --> U_Sub2
+
+   %% 4. Class Definitions
+    classDef process fill:#D6EAF8,stroke:#333,stroke-width:1px,color:#333333;
+    classDef io fill:#E8DAEF,stroke:#333,stroke-width:1px,color:#333333;
+    classDef external fill:#E5E7E9,stroke:#888,stroke-width:1px,color:#333333;
+    classDef startend fill:#FFFFFF,stroke:#333,stroke-width:2px,color:#333333;
+
+   %% 5. Class Assignments (Broken into smaller groups)
+    class A,ZG startend;
+    class B,F,I,M,Q,U,X,Z process;
+    class B_Sub1,F_Sub1,F_Sub2,I_Sub1,I_Sub2,I_Sub3 process;
+    class M_Sub1,M_Sub3,Q_Sub1,Q_Sub3,U_Sub1,X_Sub1 process;
+    class BP1,BP2,BP3,BP4,BP5,BP6 process;
+    class B_Sub2,B_Sub3,Q_Sub2,U_Sub2 io;
+    class M_Sub2 external;

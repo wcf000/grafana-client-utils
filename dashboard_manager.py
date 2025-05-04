@@ -15,7 +15,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .client import GrafanaClient
 from .exceptions import GrafanaError, GrafanaRateLimitError, GrafanaTimeoutError
-from .models import DashboardMeta, GrafanaDashboard
+from .models.index import DashboardMeta, GrafanaDashboard
 
 # Metrics
 DASHBOARD_OPERATIONS = Counter(

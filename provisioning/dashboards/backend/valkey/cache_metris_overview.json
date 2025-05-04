@@ -1,0 +1,103 @@
+{
+  "id": null,
+  "uid": "valkey-cache-metrics-overview",
+  "title": "VALKEY Cache Metrics Overview",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "VALKEY Cache Hits",
+      "targets": [
+        { "expr": "increase(valkey_cache_hits_total[5m])", "refId": "A" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "VALKEY Cache Misses",
+      "targets": [
+        { "expr": "increase(valkey_cache_misses_total[5m])", "refId": "B" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "VALKEY Hit Ratio",
+      "targets": [
+        {
+          "expr": "increase(valkey_cache_hits_total[5m]) / (increase(valkey_cache_hits_total[5m]) + increase(valkey_cache_misses_total[5m]))",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [
+        {
+          "value": 0.8,
+          "colorMode": "critical",
+          "op": "lt",
+          "line": true,
+          "fill": true
+        }
+      ],
+      "alert": {
+        "name": "Low VALKEY Hit Ratio",
+        "for": "5m",
+        "conditions": [
+          {
+            "evaluator": {"type": "lt","params": [0.8]},
+            "operator": {"type": "and"},
+            "query": {"params": ["C"]},
+            "reducer": {"type": "avg","params": []}
+          }
+        ],
+        "notifications": [{"uid": "slack-prod"},{"uid": "pagerduty-critical"}]
+      }
+    },
+    {
+      "type": "graph",
+      "title": "VALKEY Cache Sets",
+      "targets": [
+        { "expr": "increase(valkey_cache_sets_total[5m])", "refId": "D" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "VALKEY Cache Deletes",
+      "targets": [
+        { "expr": "increase(valkey_cache_deletes_total[5m])", "refId": "E" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "VALKEY Cache Errors",
+      "targets": [
+        { "expr": "increase(valkey_cache_errors_total[5m])", "refId": "F" }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": ["valkey", "cache"],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "service",
+        "datasource": "Prometheus",
+        "label": "Service",
+        "query": "label_values(valkey_cache_hits_total, service)",
+        "includeAll": true,
+        "allValue": ".*"
+      },
+      {
+        "type": "query",
+        "name": "cache_key",
+        "datasource": "Prometheus",
+        "label": "Cache Key",
+        "query": "label_values(valkey_cache_hits_total, cache_key)",
+        "includeAll": true,
+        "allValue": ".*"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "version": 1
+}

@@ -19,7 +19,7 @@ notifiers:
     type: "pagerduty"
     uid: "pagerduty-critical"
     settings:
-      integrationKey: "${PD_CRITICAL_KEY}"
+      integrationKey: "${PAGER_DUTY_CRITICAL_KEY}"
       autoResolve: false
 
   # Email notifications for less urgent alerts
@@ -27,5 +27,5 @@ notifiers:
     type: "email"
     uid: "email-team"
     settings:
-      addresses: "${ALERT_EMAILS}"  # Comma-separated list
+      addresses: "${ALERT_EMAILS}" # Comma-separated list
       singleEmail: true

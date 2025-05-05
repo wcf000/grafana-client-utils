@@ -1,0 +1,20 @@
+{
+  "id": null,
+  "uid": "celery-cache-metrics-overview",
+  "title": "Celery Cache Metrics Overview",
+  "panels": [
+    {"type":"graph","title":"Cache Hits","targets":[{"expr":"increase(celery_cache_hits_total[5m])","refId":"A"}]},
+    {"type":"graph","title":"Cache Misses","targets":[{"expr":"increase(celery_cache_misses_total[5m])","refId":"B"}]},
+    {"type":"graph","title":"Hit Ratio","targets":[{"expr":"increase(celery_cache_hits_total[5m])/(increase(celery_cache_hits_total[5m])+increase(celery_cache_misses_total[5m]))","refId":"C"}],"thresholds":[{"value":0.8,"op":"lt","line":true,"fill":true,"colorMode":"critical"}]},
+    {"type":"graph","title":"Cache Sets","targets":[{"expr":"increase(celery_cache_sets_total[5m])","refId":"D"}]},
+    {"type":"graph","title":"Cache Deletes","targets":[{"expr":"increase(celery_cache_deletes_total[5m])","refId":"E"}]}  
+  ],
+  "refresh":"5s",
+  "schemaVersion":27,
+  "style":"dark",
+  "tags":["celery","cache"],
+  "templating":{"list":[{"type":"query","name":"task","datasource":"Prometheus","label":"Task","query":"label_values(celery_cache_hits_total, task_name)","includeAll":true,"allValue":".*"}]},
+  "time":{"from":"now-1h","to":"now"},
+  "timezone":"browser",
+  "version":1
+}

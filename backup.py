@@ -12,7 +12,7 @@ import json
 import logging
 from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, dict, Optional
 
 from prometheus_client import Counter, Histogram
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -42,7 +42,7 @@ logger = logging.getLogger("grafana.backup")
 
 
 class GrafanaBackup:
-    def __init__(self, client: GrafanaClient, timeout: TimeoutThresholds | None = None):
+    def __init__(self, client: GrafanaClient, timeout: TimeoutThresholds | None):
         """Initialize backup with production-ready configuration"""
         self.client = client
         self.timeout = timeout or TimeoutThresholds()
@@ -53,7 +53,7 @@ class GrafanaBackup:
         retry=(GrafanaRateLimitError, GrafanaTimeoutError)
     )
     @BACKUP_LATENCY.time()
-    def create_backup(self) -> Dict[str, Any]:
+    def create_backup(self) -> dict[str, Any]:
         """Create a complete Grafana backup with production hardening"""
         try:
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -85,7 +85,7 @@ class GrafanaBackup:
             error.log_error()
             raise error
 
-    async def async_create_backup(self) -> Dict[str, Any]:
+    async def async_create_backup(self) -> dict[str, Any]:
         """Async version of create_backup"""
         # Implementation would use async client methods
         pass
@@ -125,7 +125,7 @@ class GrafanaBackup:
             error.log_error()
             raise error
 
-    def _validate_backup(self, backup_data: Dict[str, Any]) -> bool:
+    def _validate_backup(self, backup_data: dict[str, Any]) -> bool:
         """Validate backup contains required components"""
         required_keys = {"dashboards", "datasources", "alert_rules"}
         if not all(key in backup_data for key in required_keys):

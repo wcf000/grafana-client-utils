@@ -44,7 +44,7 @@ class ErrorDetail:
 
     code: str
     message: str
-    context: dict[str, Any] | None = None
+    context: dict[str, Any] | None
 
 
 class GrafanaError(Exception):
@@ -72,7 +72,7 @@ class GrafanaConnectionError(GrafanaError):
 
     DEFAULT_CODE = "grafana_connection_error"
 
-    def __init__(self, message: str, url: str, context: dict[str, Any] | None = None):
+    def __init__(self, message: str, url: str, context: dict[str, Any] | None):
         detail = ErrorDetail(
             code=self.DEFAULT_CODE,
             message=message,
@@ -87,7 +87,7 @@ class GrafanaAuthError(GrafanaError):
     DEFAULT_CODE = "grafana_auth_error"
 
     def __init__(
-        self, message: str, status_code: int, context: dict[str, Any] | None = None
+        self, message: str, status_code: int, context: dict[str, Any] | None
     ):
         detail = ErrorDetail(
             code=self.DEFAULT_CODE,
@@ -106,7 +106,7 @@ class GrafanaNotFoundError(GrafanaError):
         self,
         resource_type: str,
         resource_id: str,
-        context: dict[str, Any] | None = None,
+        context: dict[str, Any] | None,
     ):
         detail = ErrorDetail(
             code=self.DEFAULT_CODE,
@@ -129,7 +129,7 @@ class GrafanaConflictError(GrafanaError):
         self,
         resource_type: str,
         conflict_reason: str,
-        context: dict[str, Any] | None = None,
+        context: dict[str, Any] | None,
     ):
         detail = ErrorDetail(
             code=self.DEFAULT_CODE,
@@ -152,7 +152,7 @@ class GrafanaValidationError(GrafanaError):
         self,
         message: str,
         validation_errors: dict[str, Any],
-        context: dict[str, Any] | None = None,
+        context: dict[str, Any] | None,
     ):
         detail = ErrorDetail(
             code=self.DEFAULT_CODE,
@@ -173,7 +173,7 @@ class GrafanaRateLimitError(GrafanaError):
         limit: int,
         remaining: int,
         reset_time: str,
-        context: dict[str, Any] | None = None,
+        context: dict[str, Any] | None,
     ):
         detail = ErrorDetail(
             code=self.DEFAULT_CODE,

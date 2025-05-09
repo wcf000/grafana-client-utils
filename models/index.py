@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, dict, list, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator,  validator
 
@@ -34,7 +34,7 @@ class DashboardProviderConfig(BaseModel):
         le=86400,  # Maximum 1 day
     )
     allow_ui_updates: bool = Field(False, alias="allowUiUpdates")
-    options: Dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
 
     @validator("options")
     def validate_options(cls, v):
@@ -59,12 +59,12 @@ class DashboardPanel(BaseModel):
 
     id: int = Field(..., gt=0)
     title: str = Field(..., min_length=1, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
+    description: str | None = Field(None, max_length=500)
     datasource: str = Field(..., min_length=1, max_length=100)
-    grid_pos: Dict[str, int] = Field(..., alias="gridPos")
-    targets: List[Dict[str, Any]]
-    field_config: Dict[str, Any] = Field(..., alias="fieldConfig")
-    refresh: Optional[str] = Field(
+    grid_pos: dict[str, int] = Field(..., alias="gridPos")
+    targets: list[dict[str, Any]]
+    field_config: dict[str, Any] = Field(..., alias="fieldConfig")
+    refresh: str | None = Field(
         None,
         pattern=r"^\d+[smh]$",  # Must be like '30s', '5m', '1h'
     )
@@ -146,7 +146,7 @@ class DashboardMeta(BaseModel):
         url: Full dashboard URL
         slug: URL-friendly slug
         type: Dashboard type (fixed as 'dash-db')
-        tags: List of tags (max 10)
+        tags: list of tags (max 10)
         is_starred: Whether dashboard is starred
         folder_id: Folder ID (positive integer)
         folder_uid: Folder UID
@@ -241,7 +241,7 @@ class GrafanaDashboard(BaseModel):
         uid: Unique identifier (valid format)
         timezone: Timezone setting
         schema_version: Dashboard schema version
-        panels: List of dashboard panels
+        panels: list of dashboard panels
         annotations: Dashboard annotations
         templating: Template variables
         refresh: Refresh interval
@@ -253,11 +253,11 @@ class GrafanaDashboard(BaseModel):
     uid: str = Field(..., min_length=1, max_length=40, pattern=r"^[a-zA-Z0-9_-]+$")
     timezone: str = Field("browser", pattern=r"^(browser|UTC|[+-]\d{2}:\d{2})$")
     schema_version: int = Field(27, alias="schemaVersion", ge=1)
-    panels: List[DashboardPanel]
-    annotations: Dict[str, List[DashboardAnnotations]] = Field(default_factory=dict)
-    templating: Dict[str, List[DashboardTemplateVariable]] = Field(default_factory=dict)
+    panels: list[DashboardPanel]
+    annotations: dict[str, list[DashboardAnnotations]] = Field(default_factory=dict)
+    templating: dict[str, list[DashboardTemplateVariable]] = Field(default_factory=dict)
     refresh: str = Field("5s", pattern=r"^\d+[smh]$")
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     version: int = Field(0, ge=0)
 
     @validator("panels")
@@ -279,11 +279,11 @@ class DashboardProvisioningConfig(BaseModel):
 
     Attributes:
         api_version: Configuration API version
-        providers: List of dashboard providers (at least one required)
+        providers: list of dashboard providers (at least one required)
     """
 
     api_version: str = Field("1", alias="apiVersion")
-    providers: List[DashboardProviderConfig]
+    providers: list[DashboardProviderConfig]
 
     @validator("providers")
     def validate_providers(cls, v):

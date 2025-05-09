@@ -31,7 +31,7 @@ def record_grafana_metric(
     model: Union[GrafanaDashboard, DashboardMeta, AlertRule],
     status: str,
     duration: float,
-    error: Optional[str] = None,
+    error: str | None,
 ) -> None:
     """
     Record Prometheus metrics for a Grafana operation using typed models for labels.

@@ -23,14 +23,18 @@ from prometheus_client import Counter, Gauge
 from app.core.grafana.alert_manager import AlertRule
 from app.core.grafana.models.index import DashboardMeta, GrafanaDashboard
 from app.core.prometheus.metrics import (
-    PULSAR_CACHE_DELETES,
-    PULSAR_CACHE_HITS,
-    PULSAR_CACHE_MISSES,
-    PULSAR_CACHE_SETS,
-    CELERY_TASK_COUNT,
-    CELERY_TASK_LATENCY,
-    VALKEY_CACHE_HITS,
+   
+    get_pulsar_cache_deletes,
+    get_pulsar_cache_hits,
+    get_pulsar_cache_misses,
+    get_pulsar_cache_sets,
+    get_valkey_cache_hits,
+    get_valkey_cache_misses,
+    get_valkey_cache_sets,
+    get_valkey_cache_deletes,
+    get_valkey_cache_errors,
 )
+
 
 logger = logging.getLogger("grafana.metrics")
 
@@ -142,41 +146,61 @@ def handle_grafana_exception(operation: str, model: object, exc: Exception) -> N
 # Pulsar cache metric helpers
 def record_pulsar_cache_hit():
     """Increment Pulsar cache hit metric"""
-    PULSAR_CACHE_HITS.inc()
+    get_pulsar_cache_hits().inc()
 
 
 def record_pulsar_cache_miss():
     """Increment Pulsar cache miss metric"""
-    PULSAR_CACHE_MISSES.inc()
+    get_pulsar_cache_misses().inc()
 
 
 def record_pulsar_cache_set():
     """Increment Pulsar cache set metric"""
-    PULSAR_CACHE_SETS.inc()
+    get_pulsar_cache_sets().inc()
 
 
 def record_pulsar_cache_delete():
     """Increment Pulsar cache delete metric"""
-    PULSAR_CACHE_DELETES.inc()
+    get_pulsar_cache_deletes().inc()
 
 
 # Celery metric helpers
 def record_celery_task_success(task_name: str) -> None:
     """Increment Celery task success counter"""
-    CELERY_TASK_COUNT.labels(task_name=task_name, status="success").inc()
+    get_celery_task_count().labels(task_name=task_name, status="success").inc()
 
 
 def record_celery_task_failure(task_name: str) -> None:
     """Increment Celery task failure counter"""
-    CELERY_TASK_COUNT.labels(task_name=task_name, status="failure").inc()
+    get_celery_task_count().labels(task_name=task_name, status="failure").inc()
 
 
 def record_celery_task_latency(task_name: str, duration: float) -> None:
     """Observe Celery task execution duration"""
-    CELERY_TASK_LATENCY.labels(task_name=task_name).observe(duration)
+    get_celery_task_latency().labels(task_name=task_name).observe(duration)
 
 
 # Valkey cache metric helpers
 def record_valkey_cache_hit() -> None:
     """Increment Valkey cache hit metric"""
-    VALKEY_CACHE_HITS.inc()
+    get_valkey_cache_hits().inc()
+
+
+def record_valkey_cache_miss() -> None:
+    """Increment Valkey cache miss metric"""
+    get_valkey_cache_misses().inc()
+
+
+def record_valkey_cache_set() -> None:
+    """Increment Valkey cache set metric"""
+    get_valkey_cache_sets().inc()
+
+
+def record_valkey_cache_delete() -> None:
+    """Increment Valkey cache delete metric"""
+    get_valkey_cache_deletes().inc()
+
+
+def record_valkey_cache_error() -> None:
+    """Increment Valkey cache error metric"""
+    get_valkey_cache_errors().inc()

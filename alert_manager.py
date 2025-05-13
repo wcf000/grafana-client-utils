@@ -10,7 +10,8 @@ Production-ready Grafana alert management with:
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, dict, list, Optional
+from typing import Any, Optional
+
 
 from circuitbreaker import circuit
 from prometheus_client import Counter, Histogram
@@ -24,7 +25,7 @@ from app.core.grafana.exceptions import (
     GrafanaRateLimitError,
     GrafanaTimeoutError,
 )
-from app.core.grafana.models import TimeoutThresholds
+from app.core.grafana.models.index import TimeoutThresholds
 
 # Metrics
 ALERT_OPERATIONS = Counter(

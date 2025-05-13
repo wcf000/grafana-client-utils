@@ -7,9 +7,9 @@ class GrafanaConfig:
     """Grafana-specific configuration"""
 
     # Import from main settings
-    PORT: int = settings.GRAFANA_PORT
-    SERVICE_URL: str = settings.GRAFANA_URL
-    API_KEY: str = settings.GRAFANA_API_KEY
+    PORT: int = settings.monitoring.GRAFANA_PORT
+    SERVICE_URL: str = settings.monitoring.GRAFANA_URL
+    API_KEY: str = settings.monitoring.GRAFANA_API_KEY
     SSL_CONFIG: dict = {"verify": False}
     RETRY_CONFIG: dict = {
         "stop_max_attempt_number": 3,
@@ -21,7 +21,7 @@ class GrafanaConfig:
     UPDATE_INTERVAL: int = 10
     DEFAULT_LABELS: dict = {
         "service": "lead_ignite",
-        "environment": settings.ENVIRONMENT,
+        "environment": settings.global_settings.ENVIRONMENT,
     }
     MULTIPROC_DIR: str = "/tmp/prometheus"
     CIRCUIT_BREAKER_CONFIG = {

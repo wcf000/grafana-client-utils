@@ -12,7 +12,7 @@ import json
 import logging
 from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import Any, dict, Optional
+from typing import Any, Optional
 
 from prometheus_client import Counter, Histogram
 from tenacity import retry, stop_after_attempt, wait_exponential

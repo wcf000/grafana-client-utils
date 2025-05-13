@@ -18,6 +18,11 @@ services:
       # - ./config/grafana/dashboards/:/var/lib/grafana/dashboards/:ro
     networks:
       - app-network # Needs to reach datasources (Loki, Prometheus, Tempo)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     environment:
       # Configure Grafana via environment variables
       # Use Docker secrets for passwords/sensitive keys in production

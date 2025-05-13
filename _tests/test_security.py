@@ -32,12 +32,23 @@ def mock_requests():
         yield mock_get
 
 # --- Parameterized Security Tests ---
-@pytest.mark.parametrize("endpoint,headers,expected_status", [
-    ("http://localhost:3000/api/dashboards/uid/fastapi", None, 401),
-    ("http://localhost:3000/api/dashboards/uid/fastapi", {"Authorization": "Bearer invalid_key"}, 403),
-    ("http://localhost:3000/api/dashboards/uid/fastapi", {"Authorization": "Bearer invalid!@#$%^"}, 403),
+import pytest
+
+GRAFANA_HOSTS = ["localhost", "127.0.0.1"]
+
+@pytest.mark.parametrize("host", GRAFANA_HOSTS)
+@pytest.mark.parametrize("endpoint_path,headers,expected_status", [
+    ("/api/dashboards/uid/fastapi", None, 401),
+    ("/api/dashboards/uid/fastapi", {"Authorization": "Bearer invalid_key"}, 403),
+    ("/api/dashboards/uid/fastapi", {"Authorization": "Bearer invalid!@#$%^"}, 403),
 ])
-def test_security_status_codes(mock_requests, endpoint, headers, expected_status):
+def test_security_status_codes(mock_requests, host, endpoint_path, headers, expected_status):
+    url = f"http://{host}:3000{endpoint_path}"
+    mock_response = requests.models.Response()
+    mock_response.status_code = expected_status
+    mock_requests.return_value = mock_response
+    response = requests.get(url, headers=headers) if headers else requests.get(url)
+    assert response.status_code == expected_status
     """Test authentication, invalid API key, and malformed API key scenarios."""
     mock_response = requests.models.Response()
     mock_response.status_code = expected_status
@@ -51,8 +62,10 @@ def test_rate_limiting(mock_requests):
     mock_response = requests.models.Response()
     mock_response.status_code = 429
     mock_requests.return_value = mock_response
-    response = requests.get("http://localhost:3000/api/dashboards/uid/fastapi")
-    assert response.status_code == 429
+    for host in GRAFANA_HOSTS:
+        url = f"http://{host}:3000/api/dashboards/uid/fastapi"
+        response = requests.get(url)
+        assert response.status_code == 429
 
 # --- Resource Not Found Test ---
 def test_resource_not_found(mock_requests):
@@ -60,8 +73,10 @@ def test_resource_not_found(mock_requests):
     mock_response = requests.models.Response()
     mock_response.status_code = 404
     mock_requests.return_value = mock_response
-    response = requests.get("http://localhost:3000/api/dashboards/uid/doesnotexist")
-    assert response.status_code == 404
+    for host in GRAFANA_HOSTS:
+        url = f"http://{host}:3000/api/dashboards/uid/doesnotexist"
+        response = requests.get(url)
+        assert response.status_code == 404
 
 # --- Extendable: Add more security scenarios as needed ---
 # Example: Expired API key, XSS, etc.

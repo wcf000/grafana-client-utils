@@ -10,7 +10,11 @@ from app.core.grafana.alert_manager import (
     GrafanaError,
     GrafanaTimeoutError,
 )
+import os
+
 from app.core.grafana.client import GrafanaClient
+
+GRAFANA_HOSTS = ["localhost", "127.0.0.1"]  # Used for endpoint tests
 from app.core.grafana.models import TimeoutThresholds
 
 

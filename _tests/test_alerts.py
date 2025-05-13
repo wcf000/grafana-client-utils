@@ -14,7 +14,6 @@ import os
 
 from app.core.grafana.client import GrafanaClient
 
-GRAFANA_HOSTS = ["localhost", "127.0.0.1"]  # Used for endpoint tests
 from app.core.grafana.models import TimeoutThresholds
 
 
@@ -44,7 +43,8 @@ def sample_alert():
     )
 
 
-def test_create_alert_success(alert_manager, sample_alert, mock_grafana_client):
+def test_create_alert_success(alert_manager, sample_alert, isolated_prometheus_registry, mock_grafana_client):
+    API_RESPONSE_TIME, TEST_SUCCESS, TEST_FAILURE = isolated_prometheus_registry
     """Test successful alert creation"""
     mock_client = mock_grafana_client.get_client.return_value
     mock_client.alerting.create_alert_rule.return_value = {

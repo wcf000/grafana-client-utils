@@ -1,7 +1,6 @@
 import logging
 import os
 
-GRAFANA_HOSTS = ["localhost", "127.0.0.1"]  # Used for endpoint tests
 from typing import Optional, Union
 from unittest.mock import patch
 

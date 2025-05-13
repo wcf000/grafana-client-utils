@@ -24,8 +24,7 @@ def mock_redis_dependencies(monkeypatch):
 
 # * Always check both localhost and 127.0.0.1 for Grafana health to support Windows, WSL, and CI reliably
 GRAFANA_HEALTH_URLS = [
-    "http://localhost:3000/api/health",
-    "http://127.0.0.1:3000/api/health"
+    "http://127.0.0.1:1278  # ! Local dev default port switched to 1278/api/health"
 ]
 BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
 COMPOSE_FILE = os.path.join(BACKEND_DIR, "app", "core", "grafana", "docker", "docker-compose.grafana.yml")
@@ -88,42 +87,24 @@ def grafana_docker():
 
 
 @pytest.fixture(autouse=True)
-def isolated_prometheus_registry(monkeypatch):
+def isolated_prometheus_registry():
     """
-    Use a fresh CollectorRegistry for each test session to avoid metric duplication.
+    Yield test-local Prometheus metrics to avoid duplication errors.
     """
     from app.core.grafana._tests import metrics as metrics_mod
     test_registry = CollectorRegistry()
     API_RESPONSE_TIME, TEST_SUCCESS, TEST_FAILURE = metrics_mod.get_metrics(registry=test_registry)
-    monkeypatch.setattr(metrics_mod, "API_RESPONSE_TIME", API_RESPONSE_TIME)
-    monkeypatch.setattr(metrics_mod, "TEST_SUCCESS", TEST_SUCCESS)
-    monkeypatch.setattr(metrics_mod, "TEST_FAILURE", TEST_FAILURE)
-    yield
+    yield API_RESPONSE_TIME, TEST_SUCCESS, TEST_FAILURE
 
 # Mock settings
 class TestSettings:
-    GRAFANA_URL = os.getenv("GRAFANA_URL", "http://localhost:3000")
+
     GRAFANA_API_KEY = os.getenv("GRAFANA_API_KEY", "test_key")
     # ! Set correct docker-compose and Dockerfile locations
     DOCKER_COMPOSE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../docker/docker-compose.grafana.yml"))
     DOCKERFILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../docker/DockerFile"))
 
 
-def wait_for_grafana_ready(url: str, timeout: int = 60) -> bool:
-    """
-    Wait for Grafana to be healthy by polling the /login endpoint.
-    Returns True if healthy within timeout, else False.
-    """
-    start = time.time()
-    while time.time() - start < timeout:
-        try:
-            resp = requests.get(f"{url}/login", timeout=3)
-            if resp.status_code == 200:
-                return True
-        except Exception:
-            pass
-        time.sleep(2)
-    return False
 
 @pytest.fixture(scope="session", autouse=True)
 def grafana_docker(request):
@@ -141,16 +122,13 @@ def grafana_docker(request):
     except Exception as e:
         pytest.skip(f"Could not start Grafana via docker-compose: {e}")
         return
-    healthy = wait_for_grafana_ready(TestSettings.GRAFANA_URL)
-    if not healthy:
-        subprocess.run(down_cmd, env=env)
-        pytest.skip("Grafana did not become healthy in time.")
-        return
     yield
     subprocess.run(down_cmd, env=env)
 
+from app.core.grafana.config import GrafanaConfig
+
 @pytest.fixture(scope="session")
 def grafana_client():
-    return GrafanaClient(
-        url=TestSettings.GRAFANA_URL, credential=TestSettings.GRAFANA_API_KEY
-    )
+    config = GrafanaConfig()
+    config.API_KEY = TestSettings.GRAFANA_API_KEY
+    return GrafanaClient(config=config)

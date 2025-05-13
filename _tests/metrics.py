@@ -32,3 +32,4 @@ def get_metrics(registry=None):
         get_metrics._metrics[registry] = (API_RESPONSE_TIME, TEST_SUCCESS, TEST_FAILURE)
     return get_metrics._metrics[registry]
 
+

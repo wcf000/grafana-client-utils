@@ -12,7 +12,6 @@ See _docs/alerts.md for further test and metrics best practices.
 
 import os
 
-GRAFANA_HOSTS = ["localhost", "127.0.0.1"]  # Used for endpoint tests
 
 import pytest
 import time

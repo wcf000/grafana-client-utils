@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from prometheus_client import Counter, Histogram
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from app.core.grafana.client import GrafanaClient
 from app.core.grafana.exceptions import (
@@ -50,7 +50,7 @@ class GrafanaBackup:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError)
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError))
     )
     @BACKUP_LATENCY.time()
     def create_backup(self) -> dict[str, Any]:
@@ -93,7 +93,7 @@ class GrafanaBackup:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError)
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError))
     )
     @BACKUP_LATENCY.time()
     def save_to_file(self, backup_dir: str = "/backups") -> Path:
@@ -120,7 +120,7 @@ class GrafanaBackup:
                     code="grafana_backup_save_error",
                     message=f"Failed to save backup: {str(e)}",
                     context={"operation": "save_backup", "backup_dir": backup_dir},
-                )
+               )
             )
             error.log_error()
             raise error
@@ -140,3 +140,4 @@ class GrafanaBackup:
         """Stream available backups with pagination"""
         # Implementation would scan backup directory
         pass
+    

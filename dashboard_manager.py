@@ -11,7 +11,7 @@ import logging
 from collections.abc import AsyncIterator
 
 from prometheus_client import Counter, Histogram
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from .client import GrafanaClient
 from .exceptions import GrafanaError, GrafanaRateLimitError, GrafanaTimeoutError
@@ -40,13 +40,13 @@ class DashboardManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError),
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
     )
     @DASHBOARD_LATENCY.time()
     def get_dashboard(self, uid: str) -> GrafanaDashboard:
         """Get dashboard by UID with error handling"""
         try:
-            dashboard = self.client.get_dashboard(uid)
+            dashboard = self.client.dashboard.get_dashboard(uid)
             DASHBOARD_OPERATIONS.labels("get", "success").inc()
             return dashboard
         except GrafanaError as e:
@@ -57,7 +57,7 @@ class DashboardManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError),
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
     )
     @DASHBOARD_LATENCY.time()
     def create_dashboard(self, dashboard: GrafanaDashboard) -> DashboardMeta:
@@ -74,7 +74,7 @@ class DashboardManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError),
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
     )
     @DASHBOARD_LATENCY.time()
     def update_dashboard(self, dashboard: GrafanaDashboard) -> DashboardMeta:
@@ -91,7 +91,7 @@ class DashboardManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError),
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
     )
     @DASHBOARD_LATENCY.time()
     def delete_dashboard(self, uid: str) -> bool:
@@ -108,7 +108,7 @@ class DashboardManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=(GrafanaRateLimitError, GrafanaTimeoutError),
+        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
     )
     @DASHBOARD_LATENCY.time()
     def search_dashboards(self, query: str = "") -> list[DashboardMeta]:

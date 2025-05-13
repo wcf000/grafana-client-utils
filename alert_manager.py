@@ -78,7 +78,7 @@ class GrafanaAlertManager:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_exception_type((GrafanaRateLimitError, GrafanaTimeoutError)),
+        retry=retry_if_exception_type(GrafanaRateLimitError) | retry_if_exception_type(GrafanaTimeoutError),
     )
     @ALERT_LATENCY.labels("create").time()
     def create_alert(self, alert: AlertRule) -> dict[str, Any]:

@@ -12,11 +12,15 @@ See _docs/alerts.md for further test and metrics best practices.
 
 import os
 
-
+from unittest.mock import MagicMock
 import pytest
 import time
-from unittest.mock import patch
 from app.core.grafana._tests import metrics
+
+# Set Prometheus metrics to MagicMock directly to guarantee no AttributeError
+metrics.API_RESPONSE_TIME = MagicMock()
+metrics.TEST_SUCCESS = MagicMock()
+metrics.TEST_FAILURE = MagicMock()
 
 
 

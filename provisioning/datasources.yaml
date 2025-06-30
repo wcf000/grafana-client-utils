@@ -6,3 +6,9 @@ datasources:
   access: proxy
   url: ${PROMETHEUS_SERVICE_URL}
   isDefault: true
+- name: Tempo
+  type: tempo
+  access: proxy
+  url: ${TEMPO_SERVICE_URL}
+  isDefault: true
+

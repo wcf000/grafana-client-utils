@@ -12,8 +12,8 @@ services:
     volumes:
       # Mount volume for Grafana database, plugins, etc.
       - grafana-data:/var/lib/grafana
-      # Mount provisioning directory for datasources, dashboards (read-only)
-      - ./config/grafana/provisioning/:/etc/grafana/provisioning/:ro # Verify host path
+      # Corrected path: Mount provisioning directory from one level up
+      - ../provisioning/:/etc/grafana/provisioning/:ro
       # Optionally mount dashboards directly if not using provisioning
       # - ./config/grafana/dashboards/:/var/lib/grafana/dashboards/:ro
     networks:

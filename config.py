@@ -21,7 +21,7 @@ class GrafanaConfig:
     UPDATE_INTERVAL: int = 10
     DEFAULT_LABELS: dict = {
         "service": "lead_ignite",
-        "environment": settings.global_settings.ENVIRONMENT,
+        "environment": settings.ENVIRONMENT,  # Changed from settings.global_settings.ENVIRONMENT
     }
     MULTIPROC_DIR: str = "/tmp/prometheus"
     CIRCUIT_BREAKER_CONFIG = {
